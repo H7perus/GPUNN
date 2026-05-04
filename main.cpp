@@ -16,8 +16,9 @@
 #include "Gpuinterface/Types/Texture.h"
 
 #include "GpuNNHelpers.h"
-#include "build/debug/_deps/vk-bootstrap-src/src/VkBootstrap.h"
-#include "mnist/mnist_reader_less.hpp"
+
+#include "VkBootstrap.h"
+//#include "mnist/mnist_reader_less.hpp"
 
 #include "DrawSquares.h"
 
@@ -290,7 +291,7 @@ int main()
 
     MnistData* mnistBufferPtr = (MnistData*)inputBuffer.map();
 
-    auto dataset = mnist::read_dataset<uint8_t, uint8_t>();
+    /*auto dataset = mnist::read_dataset<uint8_t, uint8_t>();
 
     for (int i = 0; i < 60000; ++i)
     {
@@ -306,7 +307,7 @@ int main()
             mnistBufferPtr[i + 60000].imageData[pixel] =
                 glm::packHalf1x16(float(dataset.test_images.at(i).at(pixel)) / 255.f - 0.5f);
         mnistBufferPtr[i + 60000].label = dataset.test_labels.at(i);
-    }
+    }*/
     inputBuffer.unmap();
 
 
