@@ -1,0 +1,13 @@
+{
+  "name": "gpunn",
+  "version": "1.0",
+  "dependencies": [
+    "glm",
+    "sdl3",
+    {
+      "name": "sdl3",
+      "features": ["vulkan"]
+    },
+    "stb"
+  ]
+}

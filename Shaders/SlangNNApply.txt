@@ -1,0 +1,54 @@
+// import NeuralShading_Shaders.CooperativeVectorAutoDiff;
+
+struct MnistDatapoint
+{
+    float16_t img[28][28];
+    uint16_t  label;
+}
+
+
+#define INPUT_FEATURES 28 * 28
+
+#define HIDDEN_NEURONS 64
+#define HIDDEN_LAYERS 1
+// The output is vec<float, 10>
+#define OUTPUT_NEURONS 10
+
+[vk::binding(0, 0)]
+RWByteAddressBuffer input; // [1 2 3 4 …]
+[vk::binding(0, 0)]
+RWStructuredBuffer<MnistDatapoint> mnistData;
+
+[vk::binding(1, 0)]
+RWStructuredBuffer<float16_t> outputBuffer;
+
+[vk::binding(2, 0)]
+RWByteAddressBuffer weights;
+[vk::binding(2, 0)]
+RWStructuredBuffer<float16_t> weightsFP16;
+
+[vk::binding(3, 0)]
+RWByteAddressBuffer weightAdjustment;
+[vk::binding(3, 0)]
+RWStructuredBuffer<float16_t> weightAdjustmentFP16;
+
+struct PushConstants
+{
+    int imageBase;
+    int isTraining;
+    int totalSize;
+}
+[[vk::push_constant]]
+PushConstants pc;
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void computeMain(uint3 threadID: SV_DispatchThreadID)
+{
+    int valueCount = (pc.totalSize) / 2;
+    if (threadID.x < valueCount)
+    {
+        weightsFP16[threadID.x] += weightAdjustmentFP16[threadID.x] * 0.0002;
+        weightAdjustmentFP16[threadID.x] = 0;
+    }
+}
