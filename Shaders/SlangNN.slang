@@ -102,8 +102,8 @@ PushConstants pc;
 [vk::binding(4, 0)]
 Sampler2D texture;
 
-[vk::binding(5, 0)]
-Sampler2D latentTexture;
+//[vk::binding(5, 0)]
+//Sampler2D latentTexture;
 
 [vk::binding(7, 0)]
 RWStructuredBuffer<Atomic<float>> latentTrainingBuffer;
@@ -138,7 +138,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>> latentTrainingBuffer =
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>>(uint2(3031, 0));
 
-    //DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3029, 16));
+    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3029, 16));
 
     uint seed = hashCombine(imageIndex, pc.frameSeed);
     PRNG rng  = PRNG(seed);
