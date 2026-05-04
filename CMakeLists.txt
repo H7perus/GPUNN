@@ -108,3 +108,10 @@ find_package(Stb REQUIRED)
 
 add_subdirectory(${GPUNN_SRC}/GpuInterface ${GPUNN_SRC}/GpuInterface)
 target_link_libraries(GPUNN PRIVATE GpuInterface)
+
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Verbose" FORCE)
+
+add_custom_command(TARGET GPUNN POST_BUILD        # Adds a post-build event to MyTest
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        "${slang_SOURCE_DIR}/bin/slang-compiler.dll"      # <--this is in-file
+        $<TARGET_FILE_DIR:GPUNN>)                 # <--this is out-file path
