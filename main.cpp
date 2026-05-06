@@ -233,8 +233,12 @@ int main()
 
     u16* latentData = new u16[latentTexSize * latentTexSize * 4];
 
+    std::random_device rd; // Will be used to obtain a seed for the random number engine
+    std::mt19937       gen(1337);
+    std::uniform_real_distribution<> UD(0, 1);
+
     for (int i = 0; i < latentTexSize * latentTexSize * 4; i++)
-        latentData[i] = glm::packHalf1x16(0.1);
+        latentData[i] = glm::packHalf1x16(UD(gen));
 
 
     float* adamPtr = (float*)adamTrainingBuffer.map();
@@ -245,10 +249,8 @@ int main()
     }
     adamTrainingBuffer.unmap();
     // latentTrainingBuffer.unmap();
-    // latentTexture.UploadPixels(latentData);
+    latentTexture.UploadPixels(latentData);
 
-    std::random_device rd; // Will be used to obtain a seed for the random number engine
-    std::mt19937       gen(1337);
 
 
     u16* weightsPointer = new u16[numWeights];
