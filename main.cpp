@@ -196,7 +196,7 @@ int main()
     int            h;
     int            comp;
     unsigned char* image =
-        stbi_load("C:/Users/raket/source/repos/GPUNN/slangstars.png", &w, &h, &comp, STBI_rgb_alpha);
+        stbi_load("../../../../slangstars.png", &w, &h, &comp, STBI_rgb_alpha);
 
     auto testTexture = KE::VK::Texture(0, w, h, vk::Format::eR8G8B8A8Unorm, vk::ImageUsageFlagBits::eSampled,
                                        vk::MemoryPropertyFlagBits::eDeviceLocal, true);
