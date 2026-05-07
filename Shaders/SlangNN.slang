@@ -157,7 +157,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
     CoopVec<float16_t, INPUT_FEATURES> vec;
     for (int i = 0; i < INPUT_FEATURES - 4; i++)
     {
-        vec[i] = FrequencyEncode(randomUV)[i];
+        vec[i] = 0; //FrequencyEncode(randomUV)[i];
     }
     for (int i = 0; i < 4; i++)
     {
@@ -205,10 +205,11 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
 
     CoopVec<float16_t, OUTPUT_NEURONS> outputGrad;
 
+    result = exp(result);
 
     for (int i = 0; i < OUTPUT_NEURONS; i++)
     {
-        outputGrad[i] = texture.SampleLevel(randomUV, 0)[i] - result[i];
+        outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f/2.2) - pow(result[i], 1.f/2.2)) * pow(result[i], 1.f/2.2f);
 
         // dividing directly somehow rounds differently. Causes Inf in the batch summation
         outputGrad[i] *= 1.f / batch_size;
@@ -220,11 +221,11 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
             intermediateVecs[HIDDEN_LAYERS - 1], outputGrad, weights, weightAdjustment, buffOffset,
             buffOffset + pc.sizes[2], CoopVecMatrixLayout::TrainingOptimal, CoopVecComponentType::Float16);
 
-        for (int j = 0; j < HIDDEN_NEURONS; j++)
-        {
-            float factor        = (intermediateVecs[HIDDEN_LAYERS - 1][j] < 0) ? 0.1f : 1.0f;
-            intermediateGrad[j] = intermediateGrad[j] * factor;
-        }
+        // for (int j = 0; j < HIDDEN_NEURONS; j++)
+        // {
+        //     float factor        = (intermediateVecs[HIDDEN_LAYERS - 1][j] < 0) ? 0.1f : 1.0f;
+        //     intermediateGrad[j] = intermediateGrad[j] * factor;
+        // }
 
 
         DifferentialPair<CoopVec<half, HIDDEN_NEURONS>> diffPairHidden = diffPair(intermediateVecs[HIDDEN_LAYERS - 1]);

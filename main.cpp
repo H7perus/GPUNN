@@ -92,15 +92,15 @@ int main()
 
     SlangCompiledUnit weightApplyShader = compileContext.CompileShaderPath("../../../../Shaders/SlangNNApply.slang");
 
-    Slang::ComPtr<slang::IBlob> blob = weightApplyShader.getTargetCode();
+    Slang::ComPtr<slang::IBlob> blob = weightTrainingShader.getTargetCode();
 
-    std::ofstream file("spvDescriptorHeapTEST2.spv", std::ios::binary);
+    std::ofstream file("SlangNN.spv", std::ios::binary);
     file.write((char*)blob.get()->getBufferPointer(), blob.get()->getBufferSize());
     file.close();
 
     const int NeuronsPerHidden = 32;
     const int HiddenLayers     = 2; // must be 1 or more
-    const int InputSize        = 20;
+    const int InputSize        = 4;
     const int OutputSize       = 3;
 
     VK::PipelineCompute pipeline(0, weightTrainingShader);

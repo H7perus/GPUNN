@@ -7,13 +7,6 @@ struct MnistDatapoint
 }
 
 
-#define INPUT_FEATURES 28 * 28
-
-#define HIDDEN_NEURONS 64
-#define HIDDEN_LAYERS 1
-// The output is vec<float, 10>
-#define OUTPUT_NEURONS 10
-
 [vk::binding(0, 0)]
 RWByteAddressBuffer input; // [1 2 3 4 …]
 [vk::binding(0, 0)]
@@ -61,7 +54,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
 {
     float b1          = 0.9;
     float b2          = 0.999;
-    float epsilon     = 1e-5;
+    float epsilon     = 1e-8;
 
     float b1_divisor = 1.f / (1 - pow(b1, pc.imageBase));
 
@@ -102,7 +95,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
     if (threadID.x >= weightCount && threadID.x < weightCount + pixelCount)
     {
         var   pixIndex    = threadID.x - weightCount;
-        uint2 imageCoords = uint2(pixIndex % dimensions.x, pixIndex / dimensions.y);
+        uint2 imageCoords = uint2(pixIndex % dimensions.x, pixIndex / dimensions.x);
 
         float4 delta = float4(1);
         for (int i = 0; i < 4; i++)
