@@ -18,6 +18,7 @@
 #include "GpuNNHelpers.h"
 
 #include "VkBootstrap.h"
+//#include "mnist/mnist_reader_less.hpp"
 
 #include "DrawSquares.h"
 
@@ -107,6 +108,9 @@ int main()
                      NeuronsPerHidden * OutputSize;
 
 
+    // Initialise weights!
+
+
     size_t sizes[3];
 
     size_t summedTrainingOptimalOffset = 0;
@@ -191,11 +195,6 @@ int main()
                                          vk::MemoryPropertyFlagBits::eDeviceLocal, true);
 
 
-    auto latentTrainingTexture = KE::VK::Texture(0, 256, 256, vk::Format::eR16G16B16A16Sfloat,
-                                                 vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage,
-                                                 vk::MemoryPropertyFlagBits::eDeviceLocal, true);
-
-
     auto latentTrainingBuffer =
         KE::VK::Buffer(0, latentTexSize * latentTexSize * 4 * 4, vk::BufferUsageFlagBits::eStorageBuffer,
                        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, true);
@@ -263,6 +262,7 @@ int main()
                          weightTargetPointer + outputOffset, NeuronsPerHidden, OutputSize);
 
     weightBuffer.unmap();
+
 
 
     vk::CommandBuffer commandBuffer;

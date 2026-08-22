@@ -66,22 +66,14 @@ struct PRNG
 };
 
 
+
+
 [vk::binding(0, 0)]
-RWByteAddressBuffer input; // [1 2 3 4 …]
-[vk::binding(0, 0)]
-RWStructuredBuffer<MnistDatapoint> mnistData;
+ByteAddressBuffer weights;
 
 [vk::binding(1, 0)]
-RWStructuredBuffer<float16_t> outputBuffer;
-
-[vk::binding(2, 0)]
-ByteAddressBuffer weights;
-//[vk::binding(2, 0)]
-// RWStructuredBuffer<float16_t> weightsFP16;
-
-[vk::binding(3, 0)]
 RWByteAddressBuffer weightAdjustment;
-[vk::binding(3, 0)]
+[vk::binding(1, 0)]
 RWStructuredBuffer<float16_t> weightAdjustmentFP16;
 
 
@@ -99,13 +91,13 @@ struct PushConstants
 [[vk::push_constant]]
 PushConstants pc;
 
-[vk::binding(4, 0)]
+[vk::binding(2, 0)]
 Sampler2D texture;
 
-//[vk::binding(5, 0)]
+//[vk::binding(3, 0)]
 //Sampler2D latentTexture;
 
-[vk::binding(7, 0)]
+[vk::binding(4, 0)]
 RWStructuredBuffer<Atomic<float>> latentTrainingBuffer;
 
 
@@ -138,7 +130,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>> latentTrainingBuffer =
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>>(uint2(3031, 0));
 
-    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3029, 16));
+    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3027, 16));
 
     uint seed = hashCombine(imageIndex, pc.frameSeed);
     PRNG rng  = PRNG(seed);
@@ -157,7 +149,7 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
     CoopVec<float16_t, INPUT_FEATURES> vec;
     for (int i = 0; i < INPUT_FEATURES - 4; i++)
     {
-        vec[i] = 0; //FrequencyEncode(randomUV)[i];
+        vec[i] = FrequencyEncode(randomUV)[i];
     }
     for (int i = 0; i < 4; i++)
     {
@@ -209,7 +201,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
 
     for (int i = 0; i < OUTPUT_NEURONS; i++)
     {
-        outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f/2.2) - pow(result[i], 1.f/2.2)) * pow(result[i], 1.f/2.2f);
+        //outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f / 2.2) - pow(result[i], 1.f / 2.2)) * pow(result[i], 1.f / 2.2f);
+        outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f / 2.2) - pow(result[i], 1.f / 2.2)) * pow(result[i], 1.f / 2.2f);
 
         // dividing directly somehow rounds differently. Causes Inf in the batch summation
         outputGrad[i] *= 1.f / batch_size;

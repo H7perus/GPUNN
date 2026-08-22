@@ -1,28 +1,12 @@
-// import NeuralShading_Shaders.CooperativeVectorAutoDiff;
-
-struct MnistDatapoint
-{
-    float16_t img[28][28];
-    uint16_t  label;
-}
-
 
 [vk::binding(0, 0)]
-RWByteAddressBuffer input; // [1 2 3 4 …]
-[vk::binding(0, 0)]
-RWStructuredBuffer<MnistDatapoint> mnistData;
-
-[vk::binding(1, 0)]
-RWStructuredBuffer<float16_t> outputBuffer;
-
-[vk::binding(2, 0)]
 RWByteAddressBuffer weights;
-[vk::binding(2, 0)]
+[vk::binding(0, 0)]
 RWStructuredBuffer<float16_t> weightsFP16;
 
-[vk::binding(3, 0)]
+[vk::binding(1, 0)]
 RWByteAddressBuffer weightAdjustment;
-[vk::binding(3, 0)]
+[vk::binding(1, 0)]
 RWStructuredBuffer<float16_t> weightAdjustmentFP16;
 
 struct PushConstants
@@ -36,13 +20,13 @@ struct PushConstants
 [[vk::push_constant]]
 PushConstants pc;
 
-[vk::binding(5, 0)]
+[vk::binding(3, 0)]
 RWTexture2D<half4> latentTexture;
 
-[vk::binding(7, 0)]
+[vk::binding(4, 0)]
 RWStructuredBuffer<float> latentTrainingBuffer;
 
-[vk::binding(8, 0)]
+[vk::binding(5, 0)]
 RWStructuredBuffer<float> adamTrainingBuffer;
 
 

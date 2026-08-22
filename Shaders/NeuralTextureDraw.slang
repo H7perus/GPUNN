@@ -37,10 +37,10 @@ struct PushConstants
 PushConstants pc;
 
 
-[vk::binding(2, 0)]
+[vk::binding(0, 0)]
 ByteAddressBuffer weights;
 
-//[vk::binding(5, 0)]
+//[vk::binding(3, 0)]
 // Sampler2D<half4> latentTexture;
 
 // fragment shader
@@ -50,8 +50,8 @@ float4 fragMain(VSOutput input) : SV_Target
 {
 
 
-    DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3028, 16));
-    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3029, 16));
+    DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3026, 16));
+    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3027, 16));
 
     CoopVec<float16_t, INPUT_FEATURES> vec;
 
@@ -97,7 +97,8 @@ float4 fragMain(VSOutput input) : SV_Target
                                                                    CoopVecComponentType::Float16,        // matrix
         );
 
+    result = exp(result);
     // for (int i = INPUT_FEATURES - 4; i < INPUT_FEATURES; i++)
     // vec[i] = latentTexture.SampleLevel(input.uv, 0)[i] * 100000;
-    return input.uv.x > 1.5 ? latentTexture.SampleLevel(input.uv, 0) : abs(float4(result[0], result[1], result[2], 1.0)); // -texture.Sample(input.uv)
+    return input.uv.x > 0.5 ? latentTexture.SampleLevel(input.uv, 0) : abs(float4(result[0], result[1], result[2], 1.0)); // -texture.Sample(input.uv)
 }

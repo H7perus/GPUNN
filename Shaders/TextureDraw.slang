@@ -58,7 +58,7 @@ PushConstants pc;
 [shader("fragment")]
 float4 fragMain(VSOutput input) : SV_Target {
 
-    DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3028, 16));
+    DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3026, 16));
 
     //float4 returnval = pseudorandom(input.uv.x * 600 * 600 + input.uv.y * 600);
 
