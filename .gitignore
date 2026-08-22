@@ -10,3 +10,4 @@ include/mnist/mnist_reader_less.hpp
 include/mnist/mnist_reader.hpp
 include/mnist/mnist_utils.hpp
 Shaders/NeuralShading_Shaders/
+.vscode/settings.json

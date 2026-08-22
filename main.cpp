@@ -18,7 +18,6 @@
 #include "GpuNNHelpers.h"
 
 #include "VkBootstrap.h"
-//#include "mnist/mnist_reader_less.hpp"
 
 #include "DrawSquares.h"
 
@@ -50,14 +49,11 @@ int main()
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("My SDL Window",  // Window title
+    SDL_Window* window = SDL_CreateWindow("GPUNN",  // Window title
                                           1200,             // Width
                                           600,              // Height
                                           SDL_WINDOW_VULKAN // Flags
     );
-
-    std::cout << "HELLO WORLD " << u32(1337) << std::endl;
-
 
     auto         vkboot_inst = createInstance();
     vk::Instance vk_inst     = vkboot_inst.instance;
@@ -109,28 +105,6 @@ int main()
 
     int numWeights = InputSize * NeuronsPerHidden + NeuronsPerHidden * NeuronsPerHidden * (HiddenLayers - 1) +
                      NeuronsPerHidden * OutputSize;
-
-
-    // the extra is for labels!
-
-
-    struct MnistData
-    {
-        u16 imageData[InputSize];
-        u16 label;
-        u16 padd[7];
-    };
-
-    auto inputBuffer =
-        VK::Buffer(0, 70000 * sizeof(MnistData), vk::BufferUsageFlagBits::eStorageBuffer,
-                   vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, true);
-
-    auto outputBuffer =
-        VK::Buffer(0, 70000 * OutputSize * 2, vk::BufferUsageFlagBits::eStorageBuffer,
-                   vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, true);
-
-
-    // Initialise weights!
 
 
     size_t sizes[3];
@@ -291,29 +265,7 @@ int main()
     weightBuffer.unmap();
 
 
-    MnistData* mnistBufferPtr = (MnistData*)inputBuffer.map();
-
-    /*auto dataset = mnist::read_dataset<uint8_t, uint8_t>();
-
-    for (int i = 0; i < 60000; ++i)
-    {
-        for (int pixel = 0; pixel < InputSize; pixel++)
-            mnistBufferPtr[i].imageData[pixel] =
-                glm::packHalf1x16(float(dataset.training_images.at(i).at(pixel)) / 255.f - 0.5f);
-        mnistBufferPtr[i].label = dataset.training_labels.at(i);
-    }
-
-    for (int i = 0; i < 10000; i++)
-    {
-        for (int pixel = 0; pixel < InputSize; pixel++)
-            mnistBufferPtr[i + 60000].imageData[pixel] =
-                glm::packHalf1x16(float(dataset.test_images.at(i).at(pixel)) / 255.f - 0.5f);
-        mnistBufferPtr[i + 60000].label = dataset.test_labels.at(i);
-    }*/
-    inputBuffer.unmap();
-
-
-    vk::CommandBuffer commandBuffer; // = KE::VK::ContextManager::GetSwapchain(0).GetCurrentCommandBuffer();
+    vk::CommandBuffer commandBuffer;
 
     RunMLP MLPRunInfoPre;
     MLPRunInfoPre.sizes[0] = sizes[0];
@@ -359,7 +311,6 @@ int main()
     vk::MemoryBarrier barrier{vk::AccessFlagBits::eShaderWrite,
                               vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite};
 
-
     RunMLP MLPRunInfo;
     MLPRunInfo.sizes[0]  = sizes[0];
     MLPRunInfo.sizes[1]  = sizes[1];
@@ -372,6 +323,8 @@ int main()
 
     for (int epoch = 0; epoch < 10000000; epoch++)
     {
+
+
         std::cout << "PASS: " << epoch << std::endl;
 
         VK::ContextManager::GetSwapchain(0).BeginNextFrame();
@@ -419,7 +372,6 @@ int main()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-
 
     return 0;
 }
