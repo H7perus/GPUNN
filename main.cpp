@@ -224,8 +224,6 @@ int main()
     // latentTrainingBuffer.unmap();
     latentTexture.UploadPixels(latentData);
 
-
-
     u16* weightsPointer = new u16[numWeights];
     int  valoffset      = 0;
 
@@ -323,7 +321,17 @@ int main()
 
     for (int epoch = 0; epoch < 10000000; epoch++)
     {
-
+        bool      running = true;
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_QUIT)
+            {
+                running = false;
+            }
+        }
+        if (!running)
+            break;
 
         std::cout << "PASS: " << epoch << std::endl;
 

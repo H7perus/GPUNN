@@ -250,8 +250,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
         float2 dims;
         latentTexture.GetDimensions(dims.x, dims.y);
 
-        float2 fractional = frac(randomUV * dims);
-        int2   baseCoord  = floor(randomUV * dims);
+        float2 fractional = frac(randomUV * dims - 0.5);
+        int2   baseCoord  = floor(randomUV * dims - 0.5) + dims;
 
         for (int x = 0; x < 2; x++)
             for (int y = 0; y < 2; y++)
@@ -263,8 +263,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
                 float factor  = weightX * weightY;
 
                 // Ensure we don't wrap out of bounds and use Width (dims.x) for stride
-                int coordX = clamp(baseCoord.x + x, 0, int(dims.x) - 1);
-                int coordY = clamp(baseCoord.y + y, 0, int(dims.y) - 1);
+                int coordX = (baseCoord.x + x) % dims.x;
+                int coordY = (baseCoord.y + y) % dims.y;
 
                 for (int i = 0; i < 4; i++)
                 {

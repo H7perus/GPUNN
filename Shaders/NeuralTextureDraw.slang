@@ -48,8 +48,6 @@ ByteAddressBuffer weights;
 [shader("fragment")]
 float4 fragMain(VSOutput input) : SV_Target
 {
-
-
     DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3026, 16));
     DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3027, 16));
 
