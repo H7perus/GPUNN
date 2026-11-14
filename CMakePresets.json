@@ -2,7 +2,7 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "debug",
+            "name": "Debug",
             "displayName": "Debug",
             "description": "Sets Ninja generator, build and install directory",
             "generator": "Ninja",
@@ -12,6 +12,12 @@
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install/${presetName}"
             }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Debug",
+            "configurePreset": "Debug"
         }
     ]
 }

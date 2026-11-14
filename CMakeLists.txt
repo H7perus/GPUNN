@@ -62,7 +62,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(vk-bootstrap)
 
-set(SLANG_VERSION "2026.7.1")
+set(SLANG_VERSION "2026.16")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(SLANG_PLATFORM "windows")

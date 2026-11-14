@@ -66,22 +66,14 @@ struct PRNG
 };
 
 
+
+
 [vk::binding(0, 0)]
-RWByteAddressBuffer input; // [1 2 3 4 …]
-[vk::binding(0, 0)]
-RWStructuredBuffer<MnistDatapoint> mnistData;
+ByteAddressBuffer weights;
 
 [vk::binding(1, 0)]
-RWStructuredBuffer<float16_t> outputBuffer;
-
-[vk::binding(2, 0)]
-ByteAddressBuffer weights;
-//[vk::binding(2, 0)]
-// RWStructuredBuffer<float16_t> weightsFP16;
-
-[vk::binding(3, 0)]
 RWByteAddressBuffer weightAdjustment;
-[vk::binding(3, 0)]
+[vk::binding(1, 0)]
 RWStructuredBuffer<float16_t> weightAdjustmentFP16;
 
 
@@ -99,13 +91,13 @@ struct PushConstants
 [[vk::push_constant]]
 PushConstants pc;
 
-[vk::binding(4, 0)]
-Sampler2D texture;
+//[vk::binding(2, 0)]
+//Sampler2D texture;
 
-//[vk::binding(5, 0)]
+//[vk::binding(3, 0)]
 //Sampler2D latentTexture;
 
-[vk::binding(7, 0)]
+[vk::binding(4, 0)]
 RWStructuredBuffer<Atomic<float>> latentTrainingBuffer;
 
 
@@ -115,7 +107,6 @@ RWStructuredBuffer<Atomic<float>> latentTrainingBuffer;
 
 
 const static int batch_size = 4096;
-
 
 
 
@@ -137,8 +128,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
 
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>> latentTrainingBuffer =
     // DescriptorHandle<RWStructuredBuffer<Atomic<float>>>(uint2(3031, 0));
-
-    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3029, 16));
+    DescriptorHandle<Sampler2D> texture = DescriptorHandle<Sampler2D>(uint2(3026, 16));
+    DescriptorHandle<Sampler2D> latentTexture = DescriptorHandle<Sampler2D>(uint2(3027, 16));
 
     uint seed = hashCombine(imageIndex, pc.frameSeed);
     PRNG rng  = PRNG(seed);
@@ -205,10 +196,12 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
 
     CoopVec<float16_t, OUTPUT_NEURONS> outputGrad;
 
+    result = exp(result);
 
     for (int i = 0; i < OUTPUT_NEURONS; i++)
     {
-        outputGrad[i] = texture.SampleLevel(randomUV, 0)[i] - result[i];
+        //outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f / 2.2) - pow(result[i], 1.f / 2.2)) * pow(result[i], 1.f / 2.2f);
+        outputGrad[i] = (pow(texture.SampleLevel(randomUV, 0)[i], 1.f / 2.2) - pow(result[i], 1.f / 2.2)) * pow(result[i], 1.f / 2.2f);
 
         // dividing directly somehow rounds differently. Causes Inf in the batch summation
         outputGrad[i] *= 1.f / batch_size;
@@ -220,11 +213,11 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
             intermediateVecs[HIDDEN_LAYERS - 1], outputGrad, weights, weightAdjustment, buffOffset,
             buffOffset + pc.sizes[2], CoopVecMatrixLayout::TrainingOptimal, CoopVecComponentType::Float16);
 
-        for (int j = 0; j < HIDDEN_NEURONS; j++)
-        {
-            float factor        = (intermediateVecs[HIDDEN_LAYERS - 1][j] < 0) ? 0.1f : 1.0f;
-            intermediateGrad[j] = intermediateGrad[j] * factor;
-        }
+        // for (int j = 0; j < HIDDEN_NEURONS; j++)
+        // {
+        //     float factor        = (intermediateVecs[HIDDEN_LAYERS - 1][j] < 0) ? 0.1f : 1.0f;
+        //     intermediateGrad[j] = intermediateGrad[j] * factor;
+        // }
 
 
         DifferentialPair<CoopVec<half, HIDDEN_NEURONS>> diffPairHidden = diffPair(intermediateVecs[HIDDEN_LAYERS - 1]);
@@ -256,8 +249,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
         float2 dims;
         latentTexture.GetDimensions(dims.x, dims.y);
 
-        float2 fractional = frac(randomUV * dims);
-        int2   baseCoord  = floor(randomUV * dims);
+        float2 fractional = frac(randomUV * dims - 0.5);
+        int2   baseCoord  = floor(randomUV * dims - 0.5) + dims;
 
         for (int x = 0; x < 2; x++)
             for (int y = 0; y < 2; y++)
@@ -269,8 +262,8 @@ void computeMain(uint3 threadID: SV_DispatchThreadID)
                 float factor  = weightX * weightY;
 
                 // Ensure we don't wrap out of bounds and use Width (dims.x) for stride
-                int coordX = clamp(baseCoord.x + x, 0, int(dims.x) - 1);
-                int coordY = clamp(baseCoord.y + y, 0, int(dims.y) - 1);
+                int coordX = (baseCoord.x + x) % dims.x;
+                int coordY = (baseCoord.y + y) % dims.y;
 
                 for (int i = 0; i < 4; i++)
                 {

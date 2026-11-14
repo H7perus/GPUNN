@@ -1,11 +1,6 @@
 #language 2026
 module ActivationFuncs;
 
-extension<T : __BuiltinFloatingPointType, let K : int> CoopVec<T, K> : IDifferentiable
-{
-    typealias Differential = CoopVec<T, K>;
-};
-
 
 export public CoopVec<half, 16> FrequencyEncode(float2 uv)
 {

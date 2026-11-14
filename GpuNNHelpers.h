@@ -38,11 +38,13 @@ void initialiseWeights(int srcLayerSize, int dstLayerSize, u16* targetPointer, i
 {
     std::random_device rd; // Will be used to obtain a seed for the random number engine
     std::mt19937       gen(seed);
-    std::normal_distribution<> ND(0, sqrt(2.f / srcLayerSize));
 
+    std::normal_distribution<> ND(0, sqrt(2.f / srcLayerSize));
+    std::uniform_real_distribution<> UD(-0.5, 0.5);
+    
     for(int i = 0; i < srcLayerSize * dstLayerSize; i++)
     {
-        float value  = ND(gen);
+        float value  = UD(gen);
         targetPointer[i] = glm::packHalf1x16(value);
     }
 
